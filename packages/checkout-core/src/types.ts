@@ -75,7 +75,9 @@ export interface CheckoutOptions {
   pollInterval?: number;
   degradeAfter?: number;
   onPaymentIndicated?(event: { sessionId: string; endToEndId?: string }): void;
-  onDegraded?(event: { reason: 'no-shadow-dom' | 'qr-encode' | 'status-unavailable' }): void;
+  onDegraded?(event: {
+    reason: 'no-shadow-dom' | 'qr-encode' | 'status-unavailable' | 'expiry-unanchored';
+  }): void;
   onError?(error: CheckoutError): void;
   onStateChange?(state: CheckoutState): void;
 }

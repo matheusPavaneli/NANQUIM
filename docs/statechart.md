@@ -39,7 +39,9 @@ stateDiagram-v2
   created, the SDK keeps the *duration* (`Session.expiresInMs`) and counts down from the instant
   the response arrived. A device whose clock is twenty minutes off would otherwise render a fresh
   code as already expired, or stop polling before the confirmation lands. Without a `createdAt`
-  there is no trustworthy duration and the absolute `expiresAt` stands.
+  there is no trustworthy duration and the absolute `expiresAt` stands — which is reported once
+  as `onDegraded({ reason: 'expiry-unanchored' })`, because only the integrator can fix it and
+  the payer has no action to take.
 - **The amount is an invariant, not a suggestion.** If the created charge disagrees with the
   `charge` the page promised, the SDK fails with `amount_mismatch` instead of quietly drawing a
   different price.
