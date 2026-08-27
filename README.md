@@ -1,4 +1,4 @@
-# Embeddable Checkout SDK — Pix, provider-agnostic
+# NANQUIM — embeddable Pix checkout SDK, provider-agnostic
 
 A drop-in Pix payment surface that runs **on the merchant's own domain**, inside a Shadow DOM,
 with zero runtime dependencies in the browser and zero requests beyond the merchant's own PSP.
@@ -8,22 +8,27 @@ exit — a component the developer mounts on their own page without writing 800 
 copy-and-paste, countdown, polling, errors and accessibility — is what lives here.
 
 ```
-packages/
-  checkout-core/          vanilla, zero runtime deps: state machine, transport, mount
-  checkout-react/         thin wrapper: hook + component
-  provider-abacatepay/    implements PaymentProvider (normalizes only; does no networking)
-  server/                 webhook HMAC verification, idempotency, schemas (Node)
+packages/                 directory → published name
+  checkout-core/          @nanquim/core        vanilla, zero runtime deps: state machine, transport, mount
+  checkout-react/         @nanquim/react       thin wrapper: hook + component
+  provider-abacatepay/    @nanquim/abacatepay  implements PaymentProvider (normalizes only; no networking)
+  server/                 @nanquim/server      webhook HMAC verification, idempotency, schemas (Node)
 examples/
   vanilla-cdn/            <script> + <div>: proof the core needs no bundler
   next-app-router/        the real path: a server route creates the session, the client mounts
 design/                   the visual fixture and the geometric layout assertions
+docs/                     the documentation site (VitePress), deployed to GitHub Pages
 docs/statechart.md        the state graph
 ```
+
+The project is **NANQUIM**; the packages publish under the `@nanquim/*` npm scope, so every
+import below is copy-pasteable as written. Full documentation:
+<https://matheuspavaneli.github.io/NANQUIM/>
 
 ## The whole integration
 
 ```ts
-import { createCheckout, pix } from '@abcheckout/core';
+import { createCheckout, pix } from '@nanquim/core';
 
 const checkout = createCheckout({
   provider: pix(),
@@ -51,8 +56,8 @@ signed webhook.
 React:
 
 ```tsx
-import { PixCheckout } from '@abcheckout/react';
-import { pix } from '@abcheckout/core';
+import { PixCheckout } from '@nanquim/react';
+import { pix } from '@nanquim/core';
 
 <PixCheckout provider={pix()} createSession={createSession} getStatus={readStatus} />;
 ```
@@ -101,10 +106,10 @@ payload is already there to be rendered.
 
 | Package | Measured (gz) | Limit |
 | --- | ---: | ---: |
-| `checkout-core` (ESM) | 12.12 kB | 12.5 kB |
-| `checkout-core` (IIFE / CDN) | 12.22 kB | 12.5 kB |
-| `provider-abacatepay` | 919 B | 3 kB |
-| `checkout-react` | 584 B | 2 kB |
+| `checkout-core` (ESM) | 12.14 kB | 12.5 kB |
+| `checkout-core` (IIFE / CDN) | 12.24 kB | 12.5 kB |
+| `provider-abacatepay` | 920 B | 3 kB |
+| `checkout-react` | 585 B | 2 kB |
 
 The core budget was 12 kB until the security pass that added the CSPRNG-only idempotency key, the
 amount invariant, the skew-free deadline and the `refused` branch. Those cost 330 B gzipped and
