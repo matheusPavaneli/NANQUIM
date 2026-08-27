@@ -66,6 +66,7 @@ import { pix } from '@abcheckout/core';
 | Isolation both ways: Shadow DOM + `--abc-*` custom properties | `src/checkout.ts`, `src/styles.ts` |
 | Polling that does not burn the rate limit: backoff with jitter, pause on a hidden tab, hard stop at the deadline | `src/transport.ts` |
 | Expiry measured with the local clock, so a skewed device is not shown a dead code | `src/provider.ts`, `src/state.ts` |
+| A backend that drops `createdAt` is told, in development, instead of failing on a customer's clock | `CheckoutOptions.onDegraded` |
 | The promised price is an invariant: a charge for another amount fails `amount_mismatch` | `src/checkout.ts` |
 | Illegal states unrepresentable: discriminated union + a pure `transition()` | `src/state.ts` |
 | Idempotency: a double click does not create two charges, and the key comes from a CSPRNG or not at all | `src/checkout.ts` |

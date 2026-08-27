@@ -205,6 +205,7 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
       }
       issuedAt = Date.now();
       const span = session.expiresInMs;
+      if (span === undefined) options.onDegraded?.({ reason: 'expiry-unanchored' });
       dispatch({
         type: 'created',
         session,

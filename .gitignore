@@ -25,3 +25,4 @@ Thumbs.db
 !.vscode/extensions.json
 
 .workflow/
+.unique/

@@ -127,3 +127,34 @@ test('getRandomValues alone is enough to build a v4 key', async () => {
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
   );
 });
+
+test('a session with no trustworthy duration tells the integrator, not the payer', async () => {
+  const degraded: string[] = [];
+  const checkout = createCheckout({
+    createSession: () => Promise.resolve({}),
+    provider: provider(session()),
+    onDegraded: (event) => degraded.push(event.reason),
+  });
+
+  await checkout.start();
+  checkout.destroy();
+
+  assert.deepEqual(
+    degraded.filter((reason) => reason === 'expiry-unanchored'),
+    ['expiry-unanchored'],
+  );
+});
+
+test('a session that carries a duration says nothing', async () => {
+  const degraded: string[] = [];
+  const checkout = createCheckout({
+    createSession: () => Promise.resolve({}),
+    provider: provider(session({ expiresInMs: 15 * 60_000 })),
+    onDegraded: (event) => degraded.push(event.reason),
+  });
+
+  await checkout.start();
+  checkout.destroy();
+
+  assert.equal(degraded.includes('expiry-unanchored'), false);
+});

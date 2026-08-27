@@ -90,6 +90,7 @@ createServer(async (req, res) => {
       brCode: charge.brCode,
       amount: charge.amount,
       currency: charge.currency,
+      createdAt: charge.createdAt,
       expiresAt: charge.expiresAt,
       status: charge.status,
       brCodeBase64: charge.brCodeBase64,
