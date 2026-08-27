@@ -72,7 +72,7 @@ const statusOf = (charge) => {
 
 const files = {
   '/': ['examples/vanilla-cdn/index.html', 'text/html; charset=utf-8'],
-  '/abcheckout.global.js': ['packages/checkout-core/dist/abcheckout.global.js', 'text/javascript'],
+  '/nanquim.global.js': ['packages/checkout-core/dist/nanquim.global.js', 'text/javascript'],
 };
 
 createServer(async (req, res) => {

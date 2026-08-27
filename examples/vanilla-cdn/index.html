@@ -42,7 +42,7 @@
     <p class="log" id="log">…</p>
   </main>
 
-  <script src="/abcheckout.global.js"></script>
+  <script src="/nanquim.global.js"></script>
   <script>
     const params = new URLSearchParams(location.search);
     window.__abcEvents = [];
@@ -54,8 +54,8 @@
 
     let sessionId = null;
 
-    const checkout = AbCheckout.createCheckout({
-      provider: AbCheckout.pix(),
+    const checkout = Nanquim.createCheckout({
+      provider: Nanquim.pix(),
       locale: 'pt-BR',
       charge: { amount: 12990, currency: 'BRL' },
 

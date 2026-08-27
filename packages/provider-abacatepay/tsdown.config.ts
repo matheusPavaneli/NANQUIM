@@ -5,5 +5,5 @@ export default defineConfig({
   format: ['esm'],
   dts: true,
   clean: true,
-  external: ['@abcheckout/core'],
+  external: ['@nanquim/core'],
 });

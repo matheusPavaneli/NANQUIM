@@ -1,16 +1,57 @@
 {
-  "name": "@abcheckout/provider-abacatepay",
+  "name": "@nanquim/abacatepay",
   "version": "0.1.0",
-  "description": "Adapter AbacatePay para @abcheckout/core. Normaliza a resposta do PSP; nao faz rede.",
+  "description": "Adapter AbacatePay para @nanquim/core. Normaliza a resposta do PSP; nao faz rede.",
+  "keywords": [
+    "pix",
+    "abacatepay",
+    "payments",
+    "provider",
+    "brazil",
+    "nanquim"
+  ],
+  "homepage": "https://matheuspavaneli.github.io/NANQUIM/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheusPavaneli/NANQUIM.git",
+    "directory": "packages/provider-abacatepay"
+  },
+  "bugs": {
+    "url": "https://github.com/matheusPavaneli/NANQUIM/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
-  "exports": { ".": { "types": "./dist/index.d.mts", "import": "./dist/index.mjs" } },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
-  "scripts": { "build": "tsdown", "size": "size-limit" },
-  "size-limit": [{ "name": "provider-abacatepay", "path": "dist/index.mjs", "limit": "3 kB", "gzip": true }],
-  "peerDependencies": { "@abcheckout/core": "workspace:^" },
-  "devDependencies": { "@abcheckout/core": "workspace:*" },
+  "scripts": {
+    "build": "tsdown",
+    "size": "size-limit"
+  },
+  "size-limit": [
+    {
+      "name": "provider-abacatepay",
+      "path": "dist/index.mjs",
+      "limit": "3 kB",
+      "gzip": true
+    }
+  ],
+  "peerDependencies": {
+    "@nanquim/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@nanquim/core": "workspace:*"
+  },
   "license": "MIT"
 }

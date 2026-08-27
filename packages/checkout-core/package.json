@@ -1,10 +1,34 @@
 {
-  "name": "@abcheckout/core",
+  "name": "@nanquim/core",
   "version": "0.1.0",
   "description": "Superficie drop-in de pagamento Pix. Vanilla, zero dependencia de runtime.",
+  "keywords": [
+    "pix",
+    "checkout",
+    "payments",
+    "brazil",
+    "sdk",
+    "shadow-dom",
+    "qrcode",
+    "nanquim"
+  ],
+  "homepage": "https://matheuspavaneli.github.io/NANQUIM/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheusPavaneli/NANQUIM.git",
+    "directory": "packages/checkout-core"
+  },
+  "bugs": {
+    "url": "https://github.com/matheusPavaneli/NANQUIM/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -21,14 +45,24 @@
   },
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
-  "unpkg": "./dist/abcheckout.global.js",
+  "unpkg": "./dist/nanquim.global.js",
   "scripts": {
     "build": "tsdown",
     "size": "size-limit"
   },
   "size-limit": [
-    { "name": "checkout-core (esm)", "path": "dist/index.mjs", "limit": "12.5 kB", "gzip": true },
-    { "name": "checkout-core (iife/cdn)", "path": "dist/abcheckout.global.js", "limit": "12.5 kB", "gzip": true }
+    {
+      "name": "checkout-core (esm)",
+      "path": "dist/index.mjs",
+      "limit": "12.5 kB",
+      "gzip": true
+    },
+    {
+      "name": "checkout-core (iife/cdn)",
+      "path": "dist/nanquim.global.js",
+      "limit": "12.5 kB",
+      "gzip": true
+    }
   ],
   "license": "MIT"
 }

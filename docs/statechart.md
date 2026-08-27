@@ -53,7 +53,7 @@ stateDiagram-v2
 
 Nowhere in this graph. `paid` here means *the merchant's server reported a payment*, and that is
 why the public event is called `onPaymentIndicated` and not `onSuccess`. The truth is the signed
-webhook, verified in `@abcheckout/server` with constant-time HMAC and a replay window that is on
+webhook, verified in `@nanquim/server` with constant-time HMAC and a replay window that is on
 by default: `verifyWebhook` refuses a delivery with no timestamp unless the caller passes
 `requireTimestamp: false` for a provider that does not send one.
 

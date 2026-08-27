@@ -1,7 +1,7 @@
 'use client';
 
-import { PixCheckout } from '@abcheckout/react';
-import { abacatePay } from '@abcheckout/provider-abacatepay';
+import { PixCheckout } from '@nanquim/react';
+import { abacatePay } from '@nanquim/abacatepay';
 import { useMemo } from 'react';
 
 export function Checkout() {

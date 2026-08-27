@@ -1,18 +1,53 @@
 {
-  "name": "@abcheckout/server",
+  "name": "@nanquim/server",
   "version": "0.1.0",
   "description": "Verificacao HMAC de webhook, idempotencia e schemas. Node-only.",
+  "keywords": [
+    "pix",
+    "webhook",
+    "hmac",
+    "idempotency",
+    "payments",
+    "node",
+    "nanquim"
+  ],
+  "homepage": "https://matheuspavaneli.github.io/NANQUIM/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheusPavaneli/NANQUIM.git",
+    "directory": "packages/server"
+  },
+  "bugs": {
+    "url": "https://github.com/matheusPavaneli/NANQUIM/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
-    ".": { "types": "./dist/index.d.mts", "import": "./dist/index.mjs" },
-    "./verify": { "types": "./dist/verify.d.mts", "import": "./dist/verify.mjs" }
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./verify": {
+      "types": "./dist/verify.d.mts",
+      "import": "./dist/verify.mjs"
+    }
   },
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
-  "engines": { "node": ">=24" },
-  "scripts": { "build": "tsdown" },
-  "dependencies": { "zod": "4.4.3" },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
   "license": "MIT"
 }

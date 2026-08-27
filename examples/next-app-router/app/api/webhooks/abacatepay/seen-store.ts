@@ -1,4 +1,4 @@
-import { createMemorySeenStore, type SeenStore } from '@abcheckout/server';
+import { createMemorySeenStore, type SeenStore } from '@nanquim/server';
 
 function createRedisSeenStore(url: string, token: string, ttlSeconds: number): SeenStore {
   const call = async (command: readonly string[]): Promise<unknown> => {

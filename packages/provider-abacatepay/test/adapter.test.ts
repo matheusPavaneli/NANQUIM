@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { CheckoutError } from '@abcheckout/core';
+import { CheckoutError } from '@nanquim/core';
 import { brCode } from '../../../design/qr.mjs';
 import { abacatePay, normalizeSession, normalizeStatus } from '../src/index.ts';
 

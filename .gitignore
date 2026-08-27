@@ -17,6 +17,9 @@ coverage/
 
 design/states.html
 
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
 .DS_Store
 Thumbs.db
 *.log
