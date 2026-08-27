@@ -27,8 +27,8 @@
     "size": "size-limit"
   },
   "size-limit": [
-    { "name": "checkout-core (esm)", "path": "dist/index.mjs", "limit": "12 kB", "gzip": true },
-    { "name": "checkout-core (iife/cdn)", "path": "dist/abcheckout.global.js", "limit": "12 kB", "gzip": true }
+    { "name": "checkout-core (esm)", "path": "dist/index.mjs", "limit": "12.5 kB", "gzip": true },
+    { "name": "checkout-core (iife/cdn)", "path": "dist/abcheckout.global.js", "limit": "12.5 kB", "gzip": true }
   ],
   "license": "MIT"
 }

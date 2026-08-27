@@ -1,8 +1,10 @@
-import { createMemorySeenStore, handleWebhook } from '@abcheckout/server';
+import { handleWebhook } from '@abcheckout/server';
+
+import { resolveSeenStore } from './seen-store';
 
 export const runtime = 'nodejs';
 
-const seen = createMemorySeenStore();
+const seen = resolveSeenStore();
 
 export async function POST(request: Request): Promise<Response> {
   const secret = process.env.ABACATEPAY_WEBHOOK_SECRET;
@@ -17,6 +19,11 @@ export async function POST(request: Request): Promise<Response> {
     secret,
     ...(timestampHeader === null ? {} : { timestamp: Number(timestampHeader) }),
     store: seen,
+    process: async (event) => {
+      if (event.data.status.toUpperCase() !== 'PAID') return;
+      await Promise.resolve();
+      console.log(JSON.stringify({ event: 'charge.paid', id: event.data.id }));
+    },
   });
 
   if (result.status === 400) {
@@ -24,8 +31,9 @@ export async function POST(request: Request): Promise<Response> {
     return new Response('bad request', { status: 400 });
   }
 
-  if (!result.duplicate && result.event.data.status.toUpperCase() === 'PAID') {
-    console.log(JSON.stringify({ event: 'charge.paid', id: result.event.data.id }));
+  if (result.status === 500) {
+    console.error(JSON.stringify({ event: 'webhook.handler_failed', id: 'unknown' }));
+    return new Response('retry later', { status: 500 });
   }
 
   return new Response('ok');

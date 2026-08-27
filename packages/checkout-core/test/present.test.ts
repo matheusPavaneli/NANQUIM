@@ -40,6 +40,7 @@ test('creating shows the amount it already knows, and a skeleton in the arriving
 test('awaiting is monochrome, counts down, and leads with the payload', () => {
   const model = view({
     status: 'awaiting',
+    deadline: session.expiresAt,
     session,
     lastCheckedAt: NOW,
     failures: 0,
@@ -56,7 +57,14 @@ test('awaiting is monochrome, counts down, and leads with the payload', () => {
 
 test('the copied control is the inverse of itself, not a toast', () => {
   const model = view(
-    { status: 'awaiting', session, lastCheckedAt: NOW, failures: 0, checking: false },
+    {
+      status: 'awaiting',
+      session,
+      deadline: session.expiresAt,
+      lastCheckedAt: NOW,
+      failures: 0,
+      checking: false,
+    },
     { copied: true },
   );
   assert.equal(model.machine.kind, 'code');
@@ -69,6 +77,7 @@ test('the copied control is the inverse of itself, not a toast', () => {
 test('the degraded read blames the connection, keeps the code, and never claims failure', () => {
   const model = view({
     status: 'awaiting',
+    deadline: session.expiresAt,
     session,
     lastCheckedAt: NOW - 3 * 60_000,
     failures: 3,
@@ -93,7 +102,12 @@ test('the degraded read blames the connection, keeps the code, and never claims 
 });
 
 test('expired drains the rule, spends the amount and explains before it acts', () => {
-  const model = view({ status: 'expired', session, expiredAt: session.expiresAt });
+  const model = view({
+    status: 'expired',
+    session,
+    deadline: session.expiresAt,
+    expiredAt: session.expiresAt,
+  });
   assert.equal(model.life.fill, 0);
   assert.equal(model.amountTone, 'spent');
   assert.equal(model.machine.kind, 'notice');
@@ -134,7 +148,7 @@ test('a creation failure shows the provider refusal instead of hiding it', () =>
 
 test('every failure state says what happened, what to do and that nothing was charged', () => {
   const states: CheckoutState[] = [
-    { status: 'expired', session, expiredAt: session.expiresAt },
+    { status: 'expired', session, deadline: session.expiresAt, expiredAt: session.expiresAt },
     { status: 'failed', error: new CheckoutError('session_create_failed', 'x') },
   ];
   for (const state of states) {
@@ -147,7 +161,14 @@ test('every failure state says what happened, what to do and that nothing was ch
 
 test('an unknown locale falls back to the language the charge is denominated in', () => {
   const model = present(
-    { status: 'awaiting', session, lastCheckedAt: null, failures: 0, checking: false },
+    {
+      status: 'awaiting',
+      session,
+      deadline: session.expiresAt,
+      lastCheckedAt: null,
+      failures: 0,
+      checking: false,
+    },
     { ...options, messages: messagesFor(undefined) },
   );
   assert.equal(model.statusText, 'Aguardando pagamento');

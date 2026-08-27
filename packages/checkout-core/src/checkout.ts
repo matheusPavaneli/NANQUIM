@@ -20,7 +20,17 @@ const ANNOUNCE_AT = [300, 60];
 const uuid = (): string => {
   const c = globalThis.crypto;
   if (c && typeof c.randomUUID === 'function') return c.randomUUID();
-  return `abc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  if (c && typeof c.getRandomValues === 'function') {
+    const bytes = c.getRandomValues(new Uint8Array(16));
+    bytes[6] = ((bytes[6] as number) & 0x0f) | 0x40;
+    bytes[8] = ((bytes[8] as number) & 0x3f) | 0x80;
+    let out = '';
+    for (let i = 0; i < 16; i += 1) {
+      out += `${i === 4 || i === 6 || i === 8 || i === 10 ? '-' : ''}${((bytes[i] as number) + 0x100).toString(16).slice(1)}`;
+    }
+    return out;
+  }
+  throw new CheckoutError('unsupported_environment', 'no cryptographic random source');
 };
 
 const resolveTarget = (target: Element | string): Element => {
@@ -83,7 +93,9 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
     const previous = state;
     state = next;
 
-    if (next.status === 'awaiting' && previous.status !== 'awaiting') startWatching(next.session);
+    if (next.status === 'awaiting' && previous.status !== 'awaiting') {
+      startWatching(next.session, next.deadline);
+    }
     if (next.status !== 'awaiting') stopWatching();
 
     if (next.status === 'paid' && previous.status !== 'paid') {
@@ -107,7 +119,7 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
     dispatch({ type: 'checked', report, now: Date.now() });
   }
 
-  function startWatching(session: Session): void {
+  function startWatching(session: Session, until: number): void {
     stopWatching();
     if (destroyed) return;
 
@@ -130,7 +142,7 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
             throw cause;
           }
         },
-        shouldContinue: () => state.status === 'awaiting' && Date.now() < session.expiresAt,
+        shouldContinue: () => state.status === 'awaiting' && Date.now() < until,
         interval,
         maxInterval: Math.max(interval, 30_000),
         timeout: 10_000,
@@ -142,7 +154,7 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
       const now = Date.now();
       dispatch({ type: 'tick', now });
       if (state.status === 'awaiting') {
-        const left = remaining(session.expiresAt, now, issuedAt);
+        const left = remaining(until, now, issuedAt);
         const seconds = Math.ceil(left.ms / 1000);
         for (const threshold of ANNOUNCE_AT) {
           if (seconds <= threshold && !announced.has(threshold)) {
@@ -184,8 +196,21 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
         idempotencyKey: attemptKey,
       });
       const session = options.provider.normalizeSession(raw);
+      const charge = options.charge;
+      if (
+        charge !== undefined &&
+        (session.amount !== charge.amount || session.currency !== charge.currency)
+      ) {
+        throw new CheckoutError('amount_mismatch', 'the charge is not for the promised amount');
+      }
       issuedAt = Date.now();
-      dispatch({ type: 'created', session, now: issuedAt });
+      const span = session.expiresInMs;
+      dispatch({
+        type: 'created',
+        session,
+        deadline: span === undefined ? session.expiresAt : issuedAt + span,
+        now: issuedAt,
+      });
       if (session.status === 'refused') {
         const error = new CheckoutError('provider_refused', 'the provider refused the charge');
         dispatch({ type: 'createFailed', error });
@@ -247,12 +272,15 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
   const onOnline = (): void => poller?.resume();
   const onOffline = (): void => poller?.pause();
 
+  const hasDom = typeof document !== 'undefined';
   function attachListeners(): void {
+    if (!hasDom) return;
     document.addEventListener('visibilitychange', onVisibility);
     globalThis.addEventListener('online', onOnline);
     globalThis.addEventListener('offline', onOffline);
   }
   function detachListeners(): void {
+    if (!hasDom) return;
     document.removeEventListener('visibilitychange', onVisibility);
     globalThis.removeEventListener('online', onOnline);
     globalThis.removeEventListener('offline', onOffline);
@@ -321,7 +349,7 @@ export function createCheckout(options: CheckoutOptions): CheckoutHandle {
 
     attachListeners();
     render();
-    if (state.status === 'awaiting') startWatching(state.session);
+    if (state.status === 'awaiting') startWatching(state.session, state.deadline);
   }
 
   function unmount(): void {

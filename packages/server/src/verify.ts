@@ -7,6 +7,7 @@ export interface VerifyOptions {
   readonly timestamp?: number;
   readonly toleranceSeconds?: number;
   readonly now?: number;
+  readonly requireTimestamp?: boolean;
 }
 
 export type VerifyResult =
@@ -26,7 +27,9 @@ export function verifyWebhook(options: VerifyOptions): VerifyResult {
   const tolerance = options.toleranceSeconds ?? 300;
   const now = options.now ?? Date.now();
 
-  if (options.timestamp !== undefined) {
+  if (options.timestamp === undefined) {
+    if (options.requireTimestamp !== false) return { ok: false, reason: 'timestamp' };
+  } else {
     const skew = Math.abs(now / 1000 - options.timestamp);
     if (!Number.isFinite(skew) || skew > tolerance) return { ok: false, reason: 'timestamp' };
   }
@@ -54,20 +57,24 @@ export const sign = (rawBody: string, secret: string, timestamp?: number): strin
     .digest('hex');
 
 export interface SeenStore {
-  has(id: string): Promise<boolean> | boolean;
-  add(id: string): Promise<void> | void;
+  claim(id: string): Promise<boolean> | boolean;
+  release(id: string): Promise<void> | void;
 }
 
 export function createMemorySeenStore(limit = 10_000): SeenStore {
   const seen = new Set<string>();
   return {
-    has: (id) => seen.has(id),
-    add: (id) => {
+    claim: (id) => {
+      if (seen.has(id)) return false;
       if (seen.size >= limit) {
         const oldest = seen.values().next();
         if (!oldest.done) seen.delete(oldest.value);
       }
       seen.add(id);
+      return true;
+    },
+    release: (id) => {
+      seen.delete(id);
     },
   };
 }

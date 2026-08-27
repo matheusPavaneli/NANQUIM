@@ -64,11 +64,15 @@ import { pix } from '@abcheckout/core';
 | The browser is never the source of truth — there is no `onSuccess` | `src/types.ts`, `docs/statechart.md` |
 | Secrets never in the bundle: the SDK takes functions, not credentials | `CheckoutOptions.createSession` |
 | Isolation both ways: Shadow DOM + `--abc-*` custom properties | `src/checkout.ts`, `src/styles.ts` |
-| Polling that does not burn the rate limit: backoff with jitter, pause on a hidden tab, hard stop at `expiresAt` | `src/transport.ts` |
+| Polling that does not burn the rate limit: backoff with jitter, pause on a hidden tab, hard stop at the deadline | `src/transport.ts` |
+| Expiry measured with the local clock, so a skewed device is not shown a dead code | `src/provider.ts`, `src/state.ts` |
+| The promised price is an invariant: a charge for another amount fails `amount_mismatch` | `src/checkout.ts` |
 | Illegal states unrepresentable: discriminated union + a pure `transition()` | `src/state.ts` |
-| Idempotency: a double click does not create two charges | `src/checkout.ts` |
+| Idempotency: a double click does not create two charges, and the key comes from a CSPRNG or not at all | `src/checkout.ts` |
 | Our own QR (byte mode, EC M) instead of 30 kB of generic library | `src/qr/encode.ts` |
-| The payment truth: constant-time HMAC + a replay window | `packages/server/src/verify.ts` |
+| The payment truth: constant-time HMAC + a replay window that cannot be off by accident | `packages/server/src/verify.ts` |
+| Exactly-once crediting: claim the event id, process, keep the claim only on success | `packages/server/src/index.ts` |
+| The status endpoint proves ownership before it answers, and the PSP payload is whitelisted | `examples/next-app-router/app/api/checkout/` |
 
 ## Two integration requirements
 
@@ -96,10 +100,15 @@ payload is already there to be rendered.
 
 | Package | Measured (gz) | Limit |
 | --- | ---: | ---: |
-| `checkout-core` (ESM) | 11.79 kB | 12 kB |
-| `checkout-core` (IIFE / CDN) | 11.89 kB | 12 kB |
-| `provider-abacatepay` | 855 B | 3 kB |
-| `checkout-react` | 559 B | 2 kB |
+| `checkout-core` (ESM) | 12.12 kB | 12.5 kB |
+| `checkout-core` (IIFE / CDN) | 12.22 kB | 12.5 kB |
+| `provider-abacatepay` | 919 B | 3 kB |
+| `checkout-react` | 584 B | 2 kB |
+
+The core budget was 12 kB until the security pass that added the CSPRNG-only idempotency key, the
+amount invariant, the skew-free deadline and the `refused` branch. Those cost 330 B gzipped and
+the budget moved to 12.5 kB, deliberately: none of them is optional in a payment surface, and the
+alternative was to keep a number and drop a guarantee.
 
 Runtime dependencies in what reaches the browser: **zero**. Third-party requests: **zero**
 beyond the merchant's own backend.

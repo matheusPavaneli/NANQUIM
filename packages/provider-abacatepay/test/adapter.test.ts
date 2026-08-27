@@ -80,3 +80,17 @@ test('the adapter is a normalizer and nothing else', () => {
   assert.equal(typeof provider.normalizeSession, 'function');
   assert.equal(provider.subscribe, undefined, 'no realtime, so the core polls with backoff');
 });
+
+test('a createdAt from the PSP becomes a duration, so a skewed device still counts down', () => {
+  const session = normalizeSession(
+    response({
+      createdAt: '2026-01-01T12:00:00.000Z',
+      expiresAt: '2026-01-01T12:15:00.000Z',
+    }),
+  );
+  assert.equal(session.expiresInMs, 15 * 60_000);
+});
+
+test('without a createdAt the adapter does not invent a duration', () => {
+  assert.equal(normalizeSession(response()).expiresInMs, undefined);
+});

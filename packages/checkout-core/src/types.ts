@@ -13,6 +13,7 @@ export interface Session {
   readonly amount: number;
   readonly currency: string;
   readonly expiresAt: number;
+  readonly expiresInMs?: number;
   readonly status: PaymentStatus;
 }
 
@@ -28,6 +29,7 @@ export type CheckoutErrorCode =
   | 'session_invalid'
   | 'status_unavailable'
   | 'provider_refused'
+  | 'amount_mismatch'
   | 'qr_unavailable'
   | 'unsupported_environment';
 
@@ -84,11 +86,17 @@ export type CheckoutState =
   | {
       readonly status: 'awaiting';
       readonly session: Session;
+      readonly deadline: number;
       readonly lastCheckedAt: number | null;
       readonly failures: number;
       readonly checking: boolean;
     }
-  | { readonly status: 'expired'; readonly session: Session; readonly expiredAt: number }
+  | {
+      readonly status: 'expired';
+      readonly session: Session;
+      readonly deadline: number;
+      readonly expiredAt: number;
+    }
   | {
       readonly status: 'paid';
       readonly session: Session;

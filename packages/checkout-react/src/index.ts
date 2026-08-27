@@ -12,6 +12,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   useSyncExternalStore,
 } from 'react';
 
@@ -24,6 +25,7 @@ export interface UsePixCheckout {
 export function usePixCheckout(options: CheckoutOptions): UsePixCheckout {
   const latest = useRef(options);
   latest.current = options;
+  const [generation, setGeneration] = useState(0);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: handle must outlive the caller options object
   const checkout = useMemo(
@@ -46,7 +48,7 @@ export function usePixCheckout(options: CheckoutOptions): UsePixCheckout {
         onDegraded: (event) => latest.current.onDegraded?.(event),
         onError: (error) => latest.current.onError?.(error),
       }),
-    [options.provider],
+    [options.provider, generation],
   );
 
   const state = useSyncExternalStore(
@@ -66,7 +68,8 @@ export function usePixCheckout(options: CheckoutOptions): UsePixCheckout {
   useEffect(() => {
     void checkout.start();
     return () => {
-      checkout.unmount();
+      checkout.destroy();
+      setGeneration((current) => current + 1);
     };
   }, [checkout]);
 

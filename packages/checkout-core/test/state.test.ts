@@ -16,13 +16,18 @@ const session = (overrides: Partial<Session> = {}): Session => ({
   ...overrides,
 });
 
+const created = (subject: Session, now = NOW) =>
+  ({
+    type: 'created',
+    session: subject,
+    deadline: subject.expiresInMs === undefined ? subject.expiresAt : now + subject.expiresInMs,
+    now,
+  }) as const;
+
 const awaiting = (overrides: Partial<Extract<CheckoutState, { status: 'awaiting' }>> = {}) => {
-  const created = transition(
-    { status: 'creating' },
-    { type: 'created', session: session(), now: NOW },
-  );
-  assert.equal(created.status, 'awaiting');
-  return { ...created, ...overrides } as CheckoutState;
+  const state = transition({ status: 'creating' }, created(session()));
+  assert.equal(state.status, 'awaiting');
+  return { ...state, ...overrides } as CheckoutState;
 };
 
 test('the graph starts idle and only creating leads anywhere', () => {
@@ -31,10 +36,7 @@ test('the graph starts idle and only creating leads anywhere', () => {
 });
 
 test('a charge that arrives alive lands in awaiting with nothing checked yet', () => {
-  const state = transition(
-    { status: 'creating' },
-    { type: 'created', session: session(), now: NOW },
-  );
+  const state = transition({ status: 'creating' }, created(session()));
   assert.equal(state.status, 'awaiting');
   if (state.status !== 'awaiting') return;
   assert.equal(state.lastCheckedAt, null);
@@ -44,13 +46,13 @@ test('a charge that arrives alive lands in awaiting with nothing checked yet', (
 
 test('a charge that arrives already over is expired, not awaiting', () => {
   const dead = session({ expiresAt: NOW - 1 });
-  const state = transition({ status: 'creating' }, { type: 'created', session: dead, now: NOW });
+  const state = transition({ status: 'creating' }, created(dead));
   assert.equal(state.status, 'expired');
 });
 
 test('a charge that arrives already paid skips the wait', () => {
   const done = session({ status: 'paid' });
-  const state = transition({ status: 'creating' }, { type: 'created', session: done, now: NOW });
+  const state = transition({ status: 'creating' }, created(done));
   assert.equal(state.status, 'paid');
 });
 
@@ -125,4 +127,39 @@ test('events that do not apply to the current state leave it untouched', () => {
   assert.equal(transition(paid, { type: 'checkFailed', now: NOW }), paid);
   assert.equal(transition(paid, { type: 'tick', now: NOW + 1e9 }), paid);
   assert.equal(transition(paid, { type: 'start' }), paid);
+});
+
+test('a cancelled charge stops the wait instead of showing a payable code', () => {
+  const state = transition(awaiting(), {
+    type: 'checked',
+    report: { status: 'refused', providerCode: 'CANCELLED' },
+    now: NOW + 1000,
+  });
+  assert.equal(state.status, 'failed');
+  if (state.status !== 'failed') return;
+  assert.equal(state.error.code, 'provider_refused');
+  assert.equal(state.error.providerCode, 'CANCELLED');
+});
+
+test('a refunded charge is not left awaiting either', () => {
+  const state = transition(awaiting(), {
+    type: 'checked',
+    report: { status: 'refused' },
+    now: NOW + 1000,
+  });
+  assert.equal(state.status, 'failed');
+});
+
+test('the deadline follows the local clock when the provider gave a duration', () => {
+  const skewed = NOW + 20 * 60_000;
+  const subject = session({ expiresAt: NOW + 15 * 60_000, expiresInMs: 15 * 60_000 });
+  const state = transition({ status: 'creating' }, created(subject, skewed));
+  assert.equal(state.status, 'awaiting');
+  if (state.status !== 'awaiting') return;
+  assert.equal(state.deadline, skewed + 15 * 60_000);
+  assert.equal(
+    transition(state, { type: 'tick', now: skewed + 15 * 60_000 - 1 }).status,
+    'awaiting',
+  );
+  assert.equal(transition(state, { type: 'tick', now: skewed + 15 * 60_000 }).status, 'expired');
 });

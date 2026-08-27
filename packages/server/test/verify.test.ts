@@ -69,20 +69,46 @@ test('the wrong secret fails, and a garbage header is malformed rather than an e
     verifyWebhook({ rawBody: body, signature: 'not-hex!!', secret, timestamp, now: NOW }),
     { ok: false, reason: 'malformed' },
   );
-  assert.deepEqual(verifyWebhook({ rawBody: body, signature: '', secret, now: NOW }), {
-    ok: false,
-    reason: 'malformed',
-  });
+  assert.deepEqual(
+    verifyWebhook({ rawBody: body, signature: '', secret, now: NOW, requireTimestamp: false }),
+    { ok: false, reason: 'malformed' },
+  );
 });
 
 test('a sha256= prefix is tolerated, because providers disagree about it', () => {
   const signature = `sha256=${sign(body, secret)}`;
-  assert.deepEqual(verifyWebhook({ rawBody: body, signature, secret, now: NOW }), { ok: true });
+  assert.deepEqual(
+    verifyWebhook({ rawBody: body, signature, secret, now: NOW, requireTimestamp: false }),
+    { ok: true },
+  );
 });
 
-test('an event is only processed once, because duplicate delivery costs real money', async () => {
+test('a body with no timestamp is refused, so the replay window is never silently off', () => {
+  const signature = sign(body, secret);
+  assert.deepEqual(verifyWebhook({ rawBody: body, signature, secret, now: NOW }), {
+    ok: false,
+    reason: 'timestamp',
+  });
+});
+
+test('the replay window can only be waived on purpose', () => {
+  const signature = sign(body, secret);
+  assert.deepEqual(
+    verifyWebhook({ rawBody: body, signature, secret, now: NOW, requireTimestamp: false }),
+    { ok: true },
+  );
+});
+
+test('claiming an id is a single atomic step, so a concurrent delivery loses', async () => {
   const store = createMemorySeenStore();
-  assert.equal(await store.has('evt_1'), false);
-  await store.add('evt_1');
-  assert.equal(await store.has('evt_1'), true);
+  const [first, second] = await Promise.all([store.claim('evt_1'), store.claim('evt_1')]);
+  assert.equal(first, true);
+  assert.equal(second, false);
+});
+
+test('releasing a claim lets the provider retry the event', async () => {
+  const store = createMemorySeenStore();
+  assert.equal(await store.claim('evt_1'), true);
+  await store.release('evt_1');
+  assert.equal(await store.claim('evt_1'), true);
 });

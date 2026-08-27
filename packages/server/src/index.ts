@@ -26,14 +26,23 @@ export const webhookEventSchema = z.object({
 
 export type WebhookEvent = z.infer<typeof webhookEventSchema>;
 
-export interface HandleOptions extends Omit<VerifyOptions, 'rawBody'> {
+export interface HandleBaseOptions extends Omit<VerifyOptions, 'rawBody'> {
   readonly rawBody: string;
-  readonly store?: SeenStore;
 }
+
+export type HandleOptions = HandleBaseOptions &
+  (
+    | { readonly store?: undefined; readonly process?: undefined }
+    | {
+        readonly store: SeenStore;
+        readonly process: (event: WebhookEvent) => Promise<void> | void;
+      }
+  );
 
 export type HandleResult =
   | { readonly status: 200; readonly event: WebhookEvent; readonly duplicate: boolean }
-  | { readonly status: 400; readonly reason: string };
+  | { readonly status: 400; readonly reason: string }
+  | { readonly status: 500; readonly reason: 'handler'; readonly cause: unknown };
 
 export async function handleWebhook(options: HandleOptions): Promise<HandleResult> {
   const verified = verifyWebhook(options);
@@ -48,12 +57,24 @@ export async function handleWebhook(options: HandleOptions): Promise<HandleResul
 
   const result = webhookEventSchema.safeParse(parsed);
   if (!result.success) return { status: 400, reason: 'schema' };
+  const event = result.data;
 
-  const store = options.store;
-  if (store === undefined) return { status: 200, event: result.data, duplicate: false };
-  const duplicate = await store.has(result.data.id);
-  if (!duplicate) await store.add(result.data.id);
-  return { status: 200, event: result.data, duplicate };
+  const { store, process: handler } = options;
+  if (store === undefined || handler === undefined) {
+    return { status: 200, event, duplicate: false };
+  }
+
+  const claimed = await store.claim(event.id);
+  if (!claimed) return { status: 200, event, duplicate: true };
+
+  try {
+    await handler(event);
+  } catch (cause) {
+    await store.release(event.id);
+    return { status: 500, reason: 'handler', cause };
+  }
+
+  return { status: 200, event, duplicate: false };
 }
 
 export { z };

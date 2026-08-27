@@ -44,6 +44,17 @@ export const toPaymentStatus = (
   fallback: PaymentStatus = 'pending',
 ): PaymentStatus => STATUS[String(value).toLowerCase()] ?? fallback;
 
+const expiryWindow = (
+  declared: unknown,
+  createdAt: unknown,
+  expiresAt: number,
+): number | undefined => {
+  if (typeof declared === 'number' && declared > 0) return declared;
+  if (createdAt === undefined || createdAt === null) return undefined;
+  const created = typeof createdAt === 'number' ? createdAt : Date.parse(String(createdAt));
+  return created < expiresAt ? expiresAt - created : undefined;
+};
+
 export function normalizeCanonicalSession(raw: unknown): Session {
   if (!isRecord(raw)) throw new CheckoutError('session_invalid', 'the session is not an object');
   const brCode = str(raw.brCode, 'brCode');
@@ -51,13 +62,16 @@ export function normalizeCanonicalSession(raw: unknown): Session {
     throw new CheckoutError('session_invalid', 'the BR Code checksum does not match');
   }
   const base64 = typeof raw.brCodeBase64 === 'string' ? raw.brCodeBase64 : undefined;
+  const expiresAt = instant(raw.expiresAt, 'expiresAt');
+  const expiresInMs = expiryWindow(raw.expiresInMs, raw.createdAt, expiresAt);
   return {
     sessionId: str(raw.sessionId ?? raw.id, 'sessionId'),
     brCode,
     ...(base64 === undefined ? {} : { brCodeBase64: base64 }),
     amount: int(raw.amount, 'amount'),
     currency: typeof raw.currency === 'string' ? raw.currency : 'BRL',
-    expiresAt: instant(raw.expiresAt, 'expiresAt'),
+    expiresAt,
+    ...(expiresInMs === undefined ? {} : { expiresInMs }),
     status: toPaymentStatus(raw.status),
   };
 }

@@ -55,6 +55,12 @@ const instant = (value: unknown, field: string): number => {
   return parsed;
 };
 
+const optionalInstant = (value: unknown): number | undefined => {
+  if (value === undefined || value === null) return undefined;
+  const parsed = typeof value === 'number' ? value : Date.parse(String(value));
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export function normalizeSession(raw: unknown): Session {
   const data = unwrap(raw);
   const brCode = requireString(data.brCode, 'brCode');
@@ -66,13 +72,18 @@ export function normalizeSession(raw: unknown): Session {
   if (typeof amount !== 'number' || !Number.isInteger(amount)) {
     throw new CheckoutError('session_invalid', 'AbacatePay returned no integer amount');
   }
+  const expiresAt = instant(data.expiresAt, 'expiresAt');
+  const createdAt = optionalInstant(data.createdAt);
+  const expiresInMs =
+    createdAt !== undefined && expiresAt > createdAt ? expiresAt - createdAt : undefined;
   return {
     sessionId: requireString(data.id, 'id'),
     brCode,
     ...(image === undefined ? {} : { brCodeBase64: image }),
     amount,
     currency: 'BRL',
-    expiresAt: instant(data.expiresAt, 'expiresAt'),
+    expiresAt,
+    ...(expiresInMs === undefined ? {} : { expiresInMs }),
     status: mapStatus(data.status),
   };
 }

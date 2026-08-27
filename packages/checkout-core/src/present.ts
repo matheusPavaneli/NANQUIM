@@ -104,7 +104,7 @@ export function present(state: CheckoutState, options: PresentOptions): ViewMode
       };
 
     case 'awaiting': {
-      const left = remaining(state.session.expiresAt, options.now, options.issuedAt);
+      const left = remaining(state.deadline, options.now, options.issuedAt);
       const degraded = state.failures >= options.degradeAfter;
       const machine: Machine = {
         kind: 'code',
