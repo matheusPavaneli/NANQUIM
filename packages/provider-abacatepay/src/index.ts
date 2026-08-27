@@ -5,7 +5,7 @@ import {
   type PaymentStatus,
   type Session,
   type StatusReport,
-} from '@abcheckout/core';
+} from '@nanquim/core';
 
 interface Envelope {
   readonly data?: unknown;

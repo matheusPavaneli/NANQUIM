@@ -1,16 +1,60 @@
 {
-  "name": "@abcheckout/react",
+  "name": "@nanquim/react",
   "version": "0.1.0",
-  "description": "Wrapper React fino sobre @abcheckout/core.",
+  "description": "Wrapper React fino sobre @nanquim/core.",
+  "keywords": [
+    "pix",
+    "checkout",
+    "payments",
+    "react",
+    "brazil",
+    "nanquim"
+  ],
+  "homepage": "https://matheuspavaneli.github.io/NANQUIM/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheusPavaneli/NANQUIM.git",
+    "directory": "packages/checkout-react"
+  },
+  "bugs": {
+    "url": "https://github.com/matheusPavaneli/NANQUIM/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
-  "exports": { ".": { "types": "./dist/index.d.mts", "import": "./dist/index.mjs" } },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
-  "scripts": { "build": "tsdown", "size": "size-limit" },
-  "size-limit": [{ "name": "checkout-react", "path": "dist/index.mjs", "limit": "2 kB", "gzip": true }],
-  "peerDependencies": { "@abcheckout/core": "workspace:^", "react": ">=18" },
-  "devDependencies": { "@abcheckout/core": "workspace:*", "@types/react": "^19.2.0", "react": "^19.2.0" },
+  "scripts": {
+    "build": "tsdown",
+    "size": "size-limit"
+  },
+  "size-limit": [
+    {
+      "name": "checkout-react",
+      "path": "dist/index.mjs",
+      "limit": "2 kB",
+      "gzip": true
+    }
+  ],
+  "peerDependencies": {
+    "@nanquim/core": "workspace:^",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@nanquim/core": "workspace:*",
+    "@types/react": "^19.2.0",
+    "react": "^19.2.0"
+  },
   "license": "MIT"
 }

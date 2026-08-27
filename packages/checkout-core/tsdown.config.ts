@@ -9,7 +9,7 @@ const squash = (css: string): string =>
     .trim();
 
 const minifyStyles = {
-  name: 'abcheckout:minify-styles',
+  name: 'nanquim:minify-styles',
   transform(code: string, id: string): { code: string } | null {
     if (!id.replaceAll('\\', '/').endsWith('src/styles.ts')) return null;
     const declared = code.indexOf('export const styles');
@@ -31,9 +31,9 @@ export default defineConfig([
     plugins: [minifyStyles],
   },
   {
-    entry: { abcheckout: 'src/global.ts' },
+    entry: { nanquim: 'src/global.ts' },
     format: ['iife'],
-    globalName: 'AbCheckout',
+    globalName: 'Nanquim',
     outputOptions: { entryFileNames: '[name].global.js' },
     dts: false,
     clean: false,

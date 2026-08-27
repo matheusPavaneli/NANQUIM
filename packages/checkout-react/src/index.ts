@@ -4,7 +4,7 @@ import {
   type CheckoutState,
   createCheckout,
   type StatusContext,
-} from '@abcheckout/core';
+} from '@nanquim/core';
 import type { ReactElement } from 'react';
 import {
   createElement,
@@ -88,4 +88,4 @@ export function PixCheckout({ className, ...options }: PixCheckoutProps): ReactE
   });
 }
 
-export type { CheckoutHandle, CheckoutOptions, CheckoutState } from '@abcheckout/core';
+export type { CheckoutHandle, CheckoutOptions, CheckoutState } from '@nanquim/core';

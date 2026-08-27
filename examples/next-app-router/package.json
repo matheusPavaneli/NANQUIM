@@ -4,10 +4,10 @@
   "type": "module",
   "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
   "dependencies": {
-    "@abcheckout/core": "workspace:*",
-    "@abcheckout/provider-abacatepay": "workspace:*",
-    "@abcheckout/react": "workspace:*",
-    "@abcheckout/server": "workspace:*",
+    "@nanquim/core": "workspace:*",
+    "@nanquim/abacatepay": "workspace:*",
+    "@nanquim/react": "workspace:*",
+    "@nanquim/server": "workspace:*",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"

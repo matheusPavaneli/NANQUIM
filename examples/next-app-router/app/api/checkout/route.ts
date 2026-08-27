@@ -1,4 +1,4 @@
-import { idempotencyKey } from '@abcheckout/server/verify';
+import { idempotencyKey } from '@nanquim/server/verify';
 
 import { grantCookie, hasGrantSecret } from './grant';
 import { providerSessionSchema, unwrapProvider } from './shape';

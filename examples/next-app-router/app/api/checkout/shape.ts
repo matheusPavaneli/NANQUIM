@@ -1,4 +1,4 @@
-import { z } from '@abcheckout/server';
+import { z } from '@nanquim/server';
 
 export const providerSessionSchema = z
   .object({

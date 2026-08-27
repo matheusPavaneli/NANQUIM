@@ -1,5 +1,5 @@
 {
-  "name": "abcheckout-monorepo",
+  "name": "nanquim-monorepo",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.17.0",
@@ -15,7 +15,10 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "design:fixture": "node design/build-fixture.mjs",
-    "design:layout": "node design/check-layout.mjs"
+    "design:layout": "node design/check-layout.mjs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
@@ -24,10 +27,13 @@
     "@playwright/test": "1.62.1",
     "@size-limit/preset-small-lib": "13.0.3",
     "@types/node": "^24.13.3",
+    "mermaid": "^11.17.2",
     "playwright": "^1.62.1",
     "publint": "0.3.24",
     "size-limit": "13.0.3",
     "tsdown": "0.22.14",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
   }
 }

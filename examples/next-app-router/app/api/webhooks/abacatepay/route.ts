@@ -1,4 +1,4 @@
-import { handleWebhook } from '@abcheckout/server';
+import { handleWebhook } from '@nanquim/server';
 
 import { resolveSeenStore } from './seen-store';
 
