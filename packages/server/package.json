@@ -1,0 +1,18 @@
+{
+  "name": "@abcheckout/server",
+  "version": "0.1.0",
+  "description": "Verificacao HMAC de webhook, idempotencia e schemas. Node-only.",
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "exports": {
+    ".": { "types": "./dist/index.d.mts", "import": "./dist/index.mjs" },
+    "./verify": { "types": "./dist/verify.d.mts", "import": "./dist/verify.mjs" }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "engines": { "node": ">=24" },
+  "scripts": { "build": "tsdown" },
+  "dependencies": { "zod": "4.4.3" },
+  "license": "MIT"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@abcheckout/provider-abacatepay",
+  "version": "0.1.0",
+  "description": "Adapter AbacatePay para @abcheckout/core. Normaliza a resposta do PSP; nao faz rede.",
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "exports": { ".": { "types": "./dist/index.d.mts", "import": "./dist/index.mjs" } },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "scripts": { "build": "tsdown", "size": "size-limit" },
+  "size-limit": [{ "name": "provider-abacatepay", "path": "dist/index.mjs", "limit": "3 kB", "gzip": true }],
+  "peerDependencies": { "@abcheckout/core": "workspace:^" },
+  "devDependencies": { "@abcheckout/core": "workspace:*" },
+  "license": "MIT"
+}

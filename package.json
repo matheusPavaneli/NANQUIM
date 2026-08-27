@@ -1,0 +1,33 @@
+{
+  "name": "abcheckout-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/*\" build",
+    "typecheck": "tsc -p packages/checkout-core --noEmit && tsc -p packages/provider-abacatepay --noEmit && tsc -p packages/server --noEmit && tsc -p packages/checkout-react --noEmit",
+    "test": "node --test \"packages/*/test/*.test.ts\"",
+    "e2e": "playwright test",
+    "size": "pnpm -r --filter \"./packages/*\" size",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "design:fixture": "node design/build-fixture.mjs",
+    "design:layout": "node design/check-layout.mjs"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@axe-core/playwright": "^4.13.0",
+    "@biomejs/biome": "2.5.10",
+    "@playwright/test": "1.62.1",
+    "@size-limit/preset-small-lib": "13.0.3",
+    "@types/node": "^24.13.3",
+    "playwright": "^1.62.1",
+    "publint": "0.3.24",
+    "size-limit": "13.0.3",
+    "tsdown": "0.22.14",
+    "typescript": "5.9.3"
+  }
+}

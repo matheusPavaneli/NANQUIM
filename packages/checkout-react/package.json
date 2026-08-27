@@ -1,0 +1,16 @@
+{
+  "name": "@abcheckout/react",
+  "version": "0.1.0",
+  "description": "Wrapper React fino sobre @abcheckout/core.",
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "exports": { ".": { "types": "./dist/index.d.mts", "import": "./dist/index.mjs" } },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "scripts": { "build": "tsdown", "size": "size-limit" },
+  "size-limit": [{ "name": "checkout-react", "path": "dist/index.mjs", "limit": "2 kB", "gzip": true }],
+  "peerDependencies": { "@abcheckout/core": "workspace:^", "react": ">=18" },
+  "devDependencies": { "@abcheckout/core": "workspace:*", "@types/react": "^19.2.0", "react": "^19.2.0" },
+  "license": "MIT"
+}

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Example checkout — Pix drop-in via script</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 48px 20px 96px;
+    font: 15px/1.55 system-ui, sans-serif;
+    background: light-dark(#ffffff, #0b0f0e);
+    color: light-dark(#14181a, #e2eeec);
+  }
+  main { max-inline-size: 456px; margin-inline: auto; display: grid; gap: 28px; }
+  .cart { display: grid; gap: 6px; }
+  .cart h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+  .cart p { margin: 0; opacity: 0.7; font-size: 14px; }
+  .log { font-family: ui-monospace, monospace; font-size: 12px; opacity: 0.7; white-space: pre-wrap; }
+  #checkout { min-block-size: 620px; }
+  @media (min-width: 560px) { #checkout { min-block-size: 420px; } }
+</style>
+</head>
+<body>
+  <main>
+    <section class="cart">
+      <h1>Annual Plan — Example Store</h1>
+      <p>An example Pix charge. No credential exists on this page.</p>
+    </section>
+
+    <div id="checkout" lang="pt-BR"></div>
+
+    <noscript>
+      <p>
+        To pay with Pix without JavaScript, copy the code below and paste it into your bank app
+        under Pix &rsaquo; Pix Copia e Cola.
+      </p>
+      <p><code id="noscript-brcode">Charge created on the server — see examples/next-app-router.</code></p>
+    </noscript>
+
+    <p class="log" id="log">…</p>
+  </main>
+
+  <script src="/abcheckout.global.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    window.__abcEvents = [];
+    const record = (event) => window.__abcEvents.push(event);
+
+    const log = (line) => {
+      document.getElementById('log').textContent = `${new Date().toLocaleTimeString()} · ${line}`;
+    };
+
+    let sessionId = null;
+
+    const checkout = AbCheckout.createCheckout({
+      provider: AbCheckout.pix(),
+      locale: 'pt-BR',
+      charge: { amount: 12990, currency: 'BRL' },
+
+      createSession: async ({ signal, idempotencyKey }) => {
+        const response = await fetch(`/api/checkout${location.search}`, {
+          method: 'POST',
+          signal,
+          headers: { 'idempotency-key': idempotencyKey },
+        });
+        if (!response.ok) throw new Error(`createSession failed: ${response.status}`);
+        const session = await response.json();
+        sessionId = session.sessionId;
+        return session;
+      },
+
+      ...(params.get('nostatus') === '1'
+        ? {}
+        : {
+            getStatus: async ({ signal, session }) => {
+              const response = await fetch(`/api/checkout/${session.sessionId}/status`, { signal });
+              if (!response.ok) throw new Error(`getStatus failed: ${response.status}`);
+              return response.json();
+            },
+          }),
+
+      onPaymentIndicated: ({ sessionId, endToEndId }) => {
+        record({ type: 'paymentIndicated', sessionId, endToEndId });
+        log(`indicated as paid (${endToEndId ?? sessionId}) — confirming on the server…`);
+      },
+
+      onDegraded: ({ reason }) => {
+        record({ type: 'degraded', reason });
+        log(`degraded mode: ${reason}`);
+      },
+      onError: (error) => {
+        record({ type: 'error', code: error.code });
+        log(`error: ${error.code}`);
+      },
+      onStateChange: (state) => {
+        record({ type: 'state', status: state.status });
+        log(`state: ${state.status}`);
+      },
+    });
+
+    checkout.mount('#checkout');
+    checkout.start();
+  </script>
+</body>
+</html>

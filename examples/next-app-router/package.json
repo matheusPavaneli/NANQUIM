@@ -1,0 +1,15 @@
+{
+  "name": "example-next-app-router",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
+  "dependencies": {
+    "@abcheckout/core": "workspace:*",
+    "@abcheckout/provider-abacatepay": "workspace:*",
+    "@abcheckout/react": "workspace:*",
+    "@abcheckout/server": "workspace:*",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  }
+}
